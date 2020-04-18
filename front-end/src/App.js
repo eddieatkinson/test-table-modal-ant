@@ -1,8 +1,19 @@
-import React from "react";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+
 import Table from "./containers/Table";
 
-function App() {
-  return <Table />;
+import GetConfigAction from "./redux/actions/GetConfigAction";
+
+class App extends Component {
+  componentDidMount() {
+    this.props.GetConfigAction();
+  }
+  render() {
+    return <Table />;
+  }
 }
 
-export default App;
+export default connect(null, {
+  GetConfigAction,
+})(App);
