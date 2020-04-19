@@ -10,7 +10,7 @@ const INITIAL_STATE = {
     },
     {
       vendorId: "T1",
-      vednorName: "Target",
+      vendorName: "Target",
     },
     {
       vendorId: "W1",
@@ -34,7 +34,7 @@ const INITIAL_STATE = {
     },
     {
       invoiceId: 4578,
-      vendorId: "Delmonte",
+      vendorId: "D1",
       product: "B1",
       quantity: 500,
       amountBal: 1024.12,
