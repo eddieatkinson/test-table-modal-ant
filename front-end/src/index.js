@@ -4,13 +4,17 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
-import { createStore, applyMiddleware } from "redux";
+import { createStore, applyMiddleware, compose } from "redux";
 
 import RootReducer from "./redux/reducers/RootReducer";
 import reduxPromise from "redux-promise";
 import { Provider } from "react-redux";
 
-const theStore = applyMiddleware(reduxPromise)(createStore)(RootReducer);
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const theStore = createStore(
+  RootReducer,
+  composeEnhancers(applyMiddleware(reduxPromise))
+);
 
 ReactDOM.render(
   <React.StrictMode>
