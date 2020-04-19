@@ -5,6 +5,12 @@ import { forEach, map, find } from "lodash";
 import "antd/dist/antd.css";
 
 class Table extends Component {
+  state = {
+    openModal: false,
+  };
+  handlePayPress() {
+    console.log("You hit the payment button!");
+  }
   getColumns() {
     const columns = [];
     this.props.tableConfig &&
@@ -21,10 +27,16 @@ class Table extends Component {
         title: "Pay",
         dataIndex: "pay",
         render: (text, record) => {
-          console.log(text);
-          console.log(record);
           const disabled = !(record.amountDue > 0);
-          return <Button disabled={disabled}>Pay</Button>;
+          return (
+            <Button
+              type="primary"
+              disabled={disabled}
+              onClick={this.handlePayPress}
+            >
+              Pay
+            </Button>
+          );
         },
       });
     }
