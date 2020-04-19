@@ -1,13 +1,13 @@
 import { GET_CONFIG_ACTION } from "../types";
 
 const INITIAL_STATE = {
-  config: {},
+  configData: {},
 };
 
 export default function (state = INITIAL_STATE, action) {
   switch (action.type) {
     case GET_CONFIG_ACTION:
-      return { ...state, config: action.payload.data };
+      return { ...state, configData: action.payload.data };
     default:
       return state;
   }
