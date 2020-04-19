@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import Table from "./containers/Table";
+import Main from "./containers/Main";
 
 import GetConfigAction from "./redux/actions/GetConfigAction";
 
@@ -10,7 +10,7 @@ class App extends Component {
     this.props.GetConfigAction();
   }
   render() {
-    return <Table />;
+    return <Main />;
   }
 }
 
