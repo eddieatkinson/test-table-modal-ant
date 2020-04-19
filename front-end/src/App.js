@@ -1,16 +1,9 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React from "react";
 
 import Main from "./containers/Main";
 
-import GetConfigAction from "./redux/actions/GetConfigAction";
-
-class App extends Component {
-  render() {
-    return <Main />;
-  }
+function App() {
+  return <Main />;
 }
 
-export default connect(null, {
-  GetConfigAction,
-})(App);
+export default App;
