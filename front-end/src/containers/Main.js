@@ -9,7 +9,7 @@ class Main extends Component {
     visible: false,
     pressedVendor: {},
     displayCredit: true,
-    amountDue: 0,
+    amountDue: null,
   };
 
   handlePayPress(record) {
@@ -19,6 +19,12 @@ class Main extends Component {
         vendorId: record.vendorId,
       }),
       amountDue: record.amountDue,
+    });
+  }
+
+  handleCancel() {
+    this.setState({
+      visible: false,
     });
   }
 
@@ -55,6 +61,21 @@ class Main extends Component {
         <Form.Item label={secondLineLabel}>{secondLineContents}</Form.Item>
       </Form>
     );
+  }
+
+  getFooter() {
+    const secondButtonContents = this.shouldDisplayCredit()
+      ? "Credit"
+      : "Payment";
+    const footer = [
+      <Button key="cancel" onClick={() => this.handleCancel()}>
+        Cancel
+      </Button>,
+      <Button key="submit" type="primary">
+        Apply {secondButtonContents}
+      </Button>,
+    ];
+    return footer;
   }
 
   getColumns() {
@@ -113,11 +134,17 @@ class Main extends Component {
     const data = this.getData();
     const modalContents = this.state.visible && this.getModalContents();
     const modalTitle = this.state.visible && this.getModalTitle();
+    const footer = this.state.visible && this.getFooter();
 
     return (
       <div>
         <Table columns={columns} dataSource={data} />
-        <Modal title={modalTitle} visible={this.state.visible}>
+        <Modal
+          title={modalTitle}
+          visible={this.state.visible}
+          onCancel={() => this.handleCancel()}
+          footer={footer}
+        >
           {modalContents}
         </Modal>
       </div>
