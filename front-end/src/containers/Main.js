@@ -1,8 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Table, Button, Modal, Form, Input } from "antd";
-import { forEach, map, find } from "lodash";
+import { forEach, map, find, isEmpty } from "lodash";
 import "antd/dist/antd.css";
+
+import GetInvoicesAction from "../redux/actions/GetInvoicesAction";
+import GetVendorsAction from "../redux/actions/GetVendorsAction";
 
 class Main extends Component {
   state = {
@@ -11,6 +14,11 @@ class Main extends Component {
     displayCredit: true,
     amountDue: null,
   };
+
+  componentDidMount() {
+    this.props.GetInvoicesAction();
+    this.props.GetVendorsAction();
+  }
 
   handlePayPress(record) {
     this.setState({
@@ -131,7 +139,7 @@ class Main extends Component {
 
   render() {
     const columns = this.getColumns();
-    const data = this.getData();
+    const data = !isEmpty(this.props.data.vendors) && this.getData();
     const modalContents = this.state.visible && this.getModalContents();
     const modalTitle = this.state.visible && this.getModalTitle();
     const footer = this.state.visible && this.getFooter();
@@ -159,4 +167,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(Main);
+export default connect(mapStateToProps, {
+  GetInvoicesAction,
+  GetVendorsAction,
+})(Main);
