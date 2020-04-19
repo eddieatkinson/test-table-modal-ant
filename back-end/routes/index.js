@@ -8,7 +8,6 @@ router.get("/", (req, res, next) => {
 });
 
 router.get("/app/config", (req, res) => {
-  console.log(config);
   res.json(config);
 });
 

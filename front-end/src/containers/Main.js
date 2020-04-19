@@ -38,14 +38,21 @@ class Main extends Component {
 
   getModalContents() {
     const shouldDisplayCredit = this.shouldDisplayCredit();
-    const label = shouldDisplayCredit ? "Credit Balance" : "Amount Due";
-    const firstLineContents = shouldDisplayCredit
-      ? this.state.pressedVendor.creditBal
-      : this.state.amountDue;
+    let firstLineLabel = "Amont Due",
+      firstLineContents = this.state.amountDue,
+      secondLineLabel = null,
+      secondLineContents = <Input placeholder="Card Number" />;
+    if (shouldDisplayCredit) {
+      firstLineLabel = "Credit Balance";
+      firstLineContents = this.state.pressedVendor.creditBal;
+      secondLineLabel = "Amount Due";
+      secondLineContents = this.state.amountDue;
+    }
 
     return (
       <Form>
-        <Form.Item label={label}>{firstLineContents}</Form.Item>
+        <Form.Item label={firstLineLabel}>{firstLineContents}</Form.Item>
+        <Form.Item label={secondLineLabel}>{secondLineContents}</Form.Item>
       </Form>
     );
   }
@@ -102,7 +109,6 @@ class Main extends Component {
   }
 
   render() {
-    console.log(this.state.amountDue);
     const columns = this.getColumns();
     const data = this.getData();
     const modalContents = this.state.visible && this.getModalContents();
