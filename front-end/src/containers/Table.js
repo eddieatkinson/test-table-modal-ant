@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Table as AntTable } from "antd";
+import { Table as AntTable, Button } from "antd";
 import { forEach, map, find } from "lodash";
 import "antd/dist/antd.css";
 
@@ -20,6 +20,12 @@ class Table extends Component {
       columns.push({
         title: "Pay",
         dataIndex: "pay",
+        render: (text, record) => {
+          console.log(text);
+          console.log(record);
+          const disabled = !(record.amountDue > 0);
+          return <Button disabled={disabled}>Pay</Button>;
+        },
       });
     }
     return columns;
