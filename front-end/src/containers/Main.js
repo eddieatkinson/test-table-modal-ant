@@ -7,37 +7,49 @@ import "antd/dist/antd.css";
 class Main extends Component {
   state = {
     visible: false,
-    pressedId: null,
+    pressedVendor: {},
+    displayCredit: true,
+    amountDue: 0,
   };
-  handlePayPress(pressedId) {
+
+  handlePayPress(record) {
     this.setState({
       visible: true,
-      pressedId,
+      pressedVendor: find(this.props.data.vendors, {
+        vendorId: record.vendorId,
+      }),
+      amountDue: record.amountDue,
     });
   }
+
   shouldDisplayCredit() {
-    const vendorPressed = find(this.props.data.vendors, {
-      vendorId: this.state.pressedId,
-    });
-    const creditAvailable = vendorPressed.creditBal;
     const shouldDisplayCredit =
       this.props.tableConfig &&
       this.props.tableConfig.adjustEnabled &&
-      creditAvailable;
+      this.state.displayCredit &&
+      this.state.pressedVendor.creditBal;
     return shouldDisplayCredit;
   }
+
   getModalTitle() {
     const title = this.shouldDisplayCredit() ? "Credit Adjustment" : "Payment";
     return title;
   }
+
   getModalContents() {
-    const label = this.shouldDisplayCredit() ? "Credit Balance" : "Amount Due";
+    const shouldDisplayCredit = this.shouldDisplayCredit();
+    const label = shouldDisplayCredit ? "Credit Balance" : "Amount Due";
+    const firstLineContents = shouldDisplayCredit
+      ? this.state.pressedVendor.creditBal
+      : this.state.amountDue;
+
     return (
       <Form>
-        <Form.Item label={label}></Form.Item>
+        <Form.Item label={label}>{firstLineContents}</Form.Item>
       </Form>
     );
   }
+
   getColumns() {
     const columns = [];
     this.props.tableConfig &&
@@ -59,7 +71,7 @@ class Main extends Component {
             <Button
               type="primary"
               disabled={disabled}
-              onClick={() => this.handlePayPress(record.vendorId)}
+              onClick={() => this.handlePayPress(record)}
             >
               Pay
             </Button>
@@ -69,6 +81,7 @@ class Main extends Component {
     }
     return columns;
   }
+
   getData() {
     const { vendors, invoices } = this.props.data;
     const data =
@@ -87,7 +100,9 @@ class Main extends Component {
       });
     return data;
   }
+
   render() {
+    console.log(this.state.amountDue);
     const columns = this.getColumns();
     const data = this.getData();
     const modalContents = this.state.visible && this.getModalContents();
