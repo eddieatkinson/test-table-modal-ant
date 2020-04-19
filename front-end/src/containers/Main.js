@@ -4,6 +4,7 @@ import { Table, Button, Modal, Form, Input } from "antd";
 import { forEach, map, find, isEmpty } from "lodash";
 import "antd/dist/antd.css";
 
+import GetConfigAction from "../redux/actions/GetConfigAction";
 import GetInvoicesAction from "../redux/actions/GetInvoicesAction";
 import GetVendorsAction from "../redux/actions/GetVendorsAction";
 
@@ -15,9 +16,10 @@ class Main extends Component {
     amountDue: null,
   };
 
-  componentDidMount() {
-    this.props.GetInvoicesAction();
-    this.props.GetVendorsAction();
+  async componentDidMount() {
+    await this.props.GetConfigAction();
+    this.props.GetInvoicesAction(this.props.dataEndPoints.call2.path);
+    this.props.GetVendorsAction(this.props.dataEndPoints.call3.path);
   }
 
   handlePayPress(record) {
@@ -164,10 +166,12 @@ const mapStateToProps = (state) => {
   return {
     data: state.data,
     tableConfig: state.config.configData.tableConfig,
+    dataEndPoints: state.config.configData.dataEndPoints,
   };
 };
 
 export default connect(mapStateToProps, {
+  GetConfigAction,
   GetInvoicesAction,
   GetVendorsAction,
 })(Main);

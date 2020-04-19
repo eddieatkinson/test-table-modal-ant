@@ -50,8 +50,8 @@ const config = {
     ],
   },
   dataEndPoints: {
-    call2: {},
-    call3: {},
+    call2: { path: "/invoices" },
+    call3: { path: "/vendors" },
     creditPost: {},
     paymentPost: {},
   },
