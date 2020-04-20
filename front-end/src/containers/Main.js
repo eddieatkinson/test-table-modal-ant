@@ -7,13 +7,14 @@ import "antd/dist/antd.css";
 import GetConfigAction from "../redux/actions/GetConfigAction";
 import GetInvoicesAction from "../redux/actions/GetInvoicesAction";
 import GetVendorsAction from "../redux/actions/GetVendorsAction";
+import AdjustBalanceAction from "../redux/actions/AdjustBalanceAction";
 
 class Main extends Component {
   state = {
     visible: false,
-    pressedVendor: {},
     displayCredit: true,
-    amountDue: null,
+    pressedInvoiceData: {},
+    cardNumber: null,
   };
 
   async componentDidMount() {
@@ -25,16 +26,14 @@ class Main extends Component {
   handlePayPress(record) {
     this.setState({
       visible: true,
-      pressedVendor: find(this.props.data.vendors, {
-        vendorId: record.vendorId,
-      }),
-      amountDue: record.amountDue,
+      pressedInvoiceData: record,
     });
   }
 
   handleCancel() {
     this.setState({
       visible: false,
+      displayCredit: true,
     });
   }
 
@@ -43,8 +42,8 @@ class Main extends Component {
       this.props.tableConfig &&
       this.props.tableConfig.adjustEnabled &&
       this.state.displayCredit &&
-      this.state.pressedVendor.creditBal;
-    return shouldDisplayCredit;
+      this.state.pressedInvoiceData.creditBal;
+    return !!shouldDisplayCredit;
   }
 
   getModalTitle() {
@@ -52,17 +51,28 @@ class Main extends Component {
     return title;
   }
 
+  handleCardInput(e) {
+    this.setState({
+      cardNumber: e.target.value,
+    });
+  }
+
   getModalContents() {
     const shouldDisplayCredit = this.shouldDisplayCredit();
     let firstLineLabel = "Amont Due",
-      firstLineContents = this.state.amountDue,
+      firstLineContents = this.state.pressedInvoiceData.amountDue,
       secondLineLabel = null,
-      secondLineContents = <Input placeholder="Card Number" />;
+      secondLineContents = (
+        <Input
+          placeholder="Card Number"
+          onChange={(e) => this.handleCardInput(e)}
+        />
+      );
     if (shouldDisplayCredit) {
       firstLineLabel = "Credit Balance";
-      firstLineContents = this.state.pressedVendor.creditBal;
+      firstLineContents = this.state.pressedInvoiceData.creditBal;
       secondLineLabel = "Amount Due";
-      secondLineContents = this.state.amountDue;
+      secondLineContents = this.state.pressedInvoiceData.amountDue;
     }
 
     return (
@@ -73,17 +83,63 @@ class Main extends Component {
     );
   }
 
+  handlePaymentSubmit(shouldDisplayCredit, applyNoBalance) {
+    let amountDue = this.state.pressedInvoiceData.amountDue;
+    if (shouldDisplayCredit && !applyNoBalance) {
+      amountDue =
+        amountDue < this.state.pressedInvoiceData.creditBal
+          ? 0
+          : amountDue - this.state.pressedInvoiceData.creditBal;
+    } else if (!shouldDisplayCredit) {
+      amountDue = 0;
+      // let invoiceInQuestion = this.props.data.invoices[
+      //   this.state.pressedInvoiceData.key
+      // ];
+      // invoiceInQuestion.amountDue = 0;
+      // console.log(invoiceInQuestion);
+    }
+    // let invoiceInQuestion = this.props.data.invoices[
+    //   this.state.pressedInvoiceData.key
+    // ];
+    // invoiceInQuestion.amountDue = amountDue;
+    // console.log(invoiceInQuestion);
+    const input = {
+      path: this.props.dataEndPoints.paymentPost.path,
+      key: this.state.pressedInvoiceData.key,
+      amountDue,
+      invoices: this.props.data.invoices,
+    };
+    this.props.AdjustBalanceAction(input);
+
+    this.setState({
+      displayCredit: false,
+    });
+  }
+
   getFooter() {
-    const secondButtonContents = this.shouldDisplayCredit()
-      ? "Credit"
-      : "Payment";
+    const shouldDisplayCredit = this.shouldDisplayCredit();
+    const secondButtonContents = shouldDisplayCredit ? "Credit" : "Payment";
+    const thirdButton = shouldDisplayCredit ? (
+      <Button
+        key="skip"
+        type="default"
+        onClick={() => this.handlePaymentSubmit(shouldDisplayCredit, true)}
+      >
+        Do Not Apply Credit
+      </Button>
+    ) : null;
     const footer = [
       <Button key="cancel" onClick={() => this.handleCancel()}>
         Cancel
       </Button>,
-      <Button key="submit" type="primary">
+      <Button
+        key="submit"
+        type="primary"
+        onClick={() => this.handlePaymentSubmit(shouldDisplayCredit)}
+      >
         Apply {secondButtonContents}
       </Button>,
+      thirdButton,
     ];
     return footer;
   }
@@ -127,7 +183,7 @@ class Main extends Component {
       map(invoices, (invoice, i) => {
         const vendor = find(vendors, { vendorId: invoice.vendorId });
         return {
-          key: i,
+          key: invoice.invoiceId,
           vendor: vendor.vendorName,
           quantity: invoice.quantity,
           amountBal: invoice.amountBal,
@@ -174,4 +230,5 @@ export default connect(mapStateToProps, {
   GetConfigAction,
   GetInvoicesAction,
   GetVendorsAction,
+  AdjustBalanceAction,
 })(Main);

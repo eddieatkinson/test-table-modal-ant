@@ -52,8 +52,8 @@ const config = {
   dataEndPoints: {
     call2: { path: "/invoices" },
     call3: { path: "/vendors" },
-    creditPost: {},
-    paymentPost: {},
+    creditPost: { path: "/processcredit" },
+    paymentPost: { path: "/processpayment" },
   },
 };
 

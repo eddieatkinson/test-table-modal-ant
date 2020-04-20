@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const lodash = require("lodash");
 const config = require("../config/config");
 const fs = require("fs");
 
@@ -22,6 +23,24 @@ router.get("/vendors", (req, res) => {
   fs.readFile(__dirname + "/public/vendors.json", "utf8", (error, data) => {
     res.json(data);
   });
+});
+
+router.post("/processpayment", (req, res) => {
+  const { key, amountDue, invoices } = req.body;
+  const invoiceElementToAdjust = lodash.findIndex(invoices, { invoiceId: key });
+  const invoiceToAdjust = invoices[invoiceElementToAdjust];
+  invoiceToAdjust.amountDue = amountDue;
+  invoices.splice(invoiceElementToAdjust, 1, invoiceToAdjust);
+  fs.writeFile(
+    __dirname + "/public/invoices.json",
+    JSON.stringify(invoices),
+    (error) => {
+      if (error) {
+        throw error;
+      }
+      res.json({ msg: "replaced" });
+    }
+  );
 });
 
 module.exports = router;
