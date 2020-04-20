@@ -4,12 +4,11 @@ import { Table, Button, Modal, Form, Input } from "antd";
 import { forEach, map, find, isEmpty } from "lodash";
 import "antd/dist/antd.css";
 
-import { formatter } from "../utilities";
-
 import GetConfigAction from "../redux/actions/GetConfigAction";
 import GetInvoicesAction from "../redux/actions/GetInvoicesAction";
 import GetVendorsAction from "../redux/actions/GetVendorsAction";
 import AdjustBalanceAction from "../redux/actions/AdjustBalanceAction";
+import AdjustCreditAction from "../redux/actions/AdjustCreditAction";
 
 class Main extends Component {
   state = {
@@ -86,32 +85,30 @@ class Main extends Component {
   }
 
   handlePaymentSubmit(shouldDisplayCredit, applyNoBalance) {
+    let pathKey = shouldDisplayCredit ? "creditPost" : "paymentPost";
     let amountDue = this.state.pressedInvoiceData.amountDue;
+    let creditBal = this.state.pressedInvoiceData.creditBal;
     if (shouldDisplayCredit && !applyNoBalance) {
-      amountDue =
-        amountDue < this.state.pressedInvoiceData.creditBal
-          ? 0
-          : amountDue - this.state.pressedInvoiceData.creditBal;
+      creditBal = amountDue < creditBal ? creditBal - amountDue : 0;
+      amountDue = amountDue < creditBal ? 0 : amountDue - creditBal;
     } else if (!shouldDisplayCredit) {
       amountDue = 0;
-      // let invoiceInQuestion = this.props.data.invoices[
-      //   this.state.pressedInvoiceData.key
-      // ];
-      // invoiceInQuestion.amountDue = 0;
-      // console.log(invoiceInQuestion);
     }
-    // let invoiceInQuestion = this.props.data.invoices[
-    //   this.state.pressedInvoiceData.key
-    // ];
-    // invoiceInQuestion.amountDue = amountDue;
-    // console.log(invoiceInQuestion);
     const input = {
-      path: this.props.dataEndPoints.paymentPost.path,
+      path: this.props.dataEndPoints[pathKey].path,
       key: this.state.pressedInvoiceData.key,
       amountDue,
+      creditBal,
       invoices: this.props.data.invoices,
+      vendors: this.props.data.vendors,
+      vendorId: this.state.pressedInvoiceData.vendorId,
     };
-    this.props.AdjustBalanceAction(input);
+
+    if (shouldDisplayCredit && !applyNoBalance) {
+      this.props.AdjustCreditAction(input);
+    } else if (!shouldDisplayCredit) {
+      this.props.AdjustBalanceAction(input);
+    }
 
     this.setState({
       displayCredit: false,
@@ -182,17 +179,15 @@ class Main extends Component {
     const { vendors, invoices } = this.props.data;
     const data =
       invoices &&
-      map(invoices, (invoice, i) => {
+      map(invoices, (invoice) => {
         const vendor = find(vendors, { vendorId: invoice.vendorId });
         return {
           key: invoice.invoiceId,
           vendor: vendor.vendorName,
           quantity: invoice.quantity,
-          amountBal: formatter.format(invoice.amountBal),
-          amountDue: formatter.format(invoice.amountDue),
-          creditBal: vendor.creditBal
-            ? formatter.format(vendor.creditBal)
-            : formatter.format(0),
+          amountBal: invoice.amountBal,
+          amountDue: invoice.amountDue,
+          creditBal: vendor.creditBal ? vendor.creditBal : 0,
           vendorId: invoice.vendorId,
         };
       });
@@ -200,6 +195,7 @@ class Main extends Component {
   }
 
   render() {
+    // console.log(this.state);
     const columns = this.getColumns();
     const data = !isEmpty(this.props.data.vendors) && this.getData();
     const modalContents = this.state.visible && this.getModalContents();
@@ -235,4 +231,5 @@ export default connect(mapStateToProps, {
   GetInvoicesAction,
   GetVendorsAction,
   AdjustBalanceAction,
+  AdjustCreditAction,
 })(Main);

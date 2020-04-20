@@ -43,4 +43,22 @@ router.post("/processpayment", (req, res) => {
   );
 });
 
+router.post("/processcredit", (req, res) => {
+  const { vendors, vendorId, creditBal } = req.body;
+  const vendorElementToAdjust = lodash.findIndex(vendors, { vendorId });
+  const vendorToAdjust = vendors[vendorElementToAdjust];
+  vendorToAdjust.creditBal = creditBal;
+  vendors.splice(vendorElementToAdjust, 1, vendorToAdjust);
+  fs.writeFile(
+    __dirname + "/public/vendors.json",
+    JSON.stringify(vendors),
+    (error) => {
+      if (error) {
+        throw error;
+      }
+      res.json({ msg: "replaced" });
+    }
+  );
+});
+
 module.exports = router;
