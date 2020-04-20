@@ -4,6 +4,8 @@ import { Table, Button, Modal, Form, Input } from "antd";
 import { forEach, map, find, isEmpty } from "lodash";
 import "antd/dist/antd.css";
 
+import { formatter } from "../utilities";
+
 import GetConfigAction from "../redux/actions/GetConfigAction";
 import GetInvoicesAction from "../redux/actions/GetInvoicesAction";
 import GetVendorsAction from "../redux/actions/GetVendorsAction";
@@ -186,9 +188,11 @@ class Main extends Component {
           key: invoice.invoiceId,
           vendor: vendor.vendorName,
           quantity: invoice.quantity,
-          amountBal: invoice.amountBal,
-          amountDue: invoice.amountDue,
-          creditBal: vendor.creditBal ? vendor.creditBal : 0,
+          amountBal: formatter.format(invoice.amountBal),
+          amountDue: formatter.format(invoice.amountDue),
+          creditBal: vendor.creditBal
+            ? formatter.format(vendor.creditBal)
+            : formatter.format(0),
           vendorId: invoice.vendorId,
         };
       });
