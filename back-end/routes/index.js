@@ -38,7 +38,7 @@ router.post("/processpayment", (req, res) => {
       if (error) {
         throw error;
       }
-      res.json({ msg: "replaced" });
+      res.json({ msg: "balance replaced" });
     }
   );
 });
@@ -56,7 +56,7 @@ router.post("/processcredit", (req, res) => {
       if (error) {
         throw error;
       }
-      res.json({ msg: "replaced" });
+      res.json({ msg: "credit replaced" });
     }
   );
 });

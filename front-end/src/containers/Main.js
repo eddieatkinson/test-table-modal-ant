@@ -84,7 +84,7 @@ class Main extends Component {
     );
   }
 
-  handlePaymentSubmit(shouldDisplayCredit, applyNoBalance) {
+  async handlePaymentSubmit(shouldDisplayCredit, applyNoBalance) {
     let pathKey = shouldDisplayCredit ? "creditPost" : "paymentPost";
     let amountDue = this.state.pressedInvoiceData.amountDue;
     let creditBal = this.state.pressedInvoiceData.creditBal;
@@ -99,20 +99,21 @@ class Main extends Component {
       key: this.state.pressedInvoiceData.key,
       amountDue,
       creditBal,
-      invoices: this.props.data.invoices,
-      vendors: this.props.data.vendors,
+      invoices: this.props.invoices,
+      vendors: this.props.vendors,
       vendorId: this.state.pressedInvoiceData.vendorId,
     };
 
     if (shouldDisplayCredit && !applyNoBalance) {
-      this.props.AdjustCreditAction(input);
-    } else if (!shouldDisplayCredit) {
-      this.props.AdjustBalanceAction(input);
+      await this.props.AdjustCreditAction(input);
     }
+    await this.props.AdjustBalanceAction(input);
 
     this.setState({
       displayCredit: false,
     });
+    this.props.GetInvoicesAction(this.props.dataEndPoints.call2.path);
+    this.props.GetVendorsAction(this.props.dataEndPoints.call3.path);
   }
 
   getFooter() {
@@ -176,7 +177,7 @@ class Main extends Component {
   }
 
   getData() {
-    const { vendors, invoices } = this.props.data;
+    const { vendors, invoices } = this.props;
     const data =
       invoices &&
       map(invoices, (invoice) => {
@@ -195,9 +196,8 @@ class Main extends Component {
   }
 
   render() {
-    // console.log(this.state);
     const columns = this.getColumns();
-    const data = !isEmpty(this.props.data.vendors) && this.getData();
+    const data = !isEmpty(this.props.vendors) && this.getData();
     const modalContents = this.state.visible && this.getModalContents();
     const modalTitle = this.state.visible && this.getModalTitle();
     const footer = this.state.visible && this.getFooter();
@@ -220,7 +220,8 @@ class Main extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    data: state.data,
+    vendors: state.data.vendors,
+    invoices: state.data.invoices,
     tableConfig: state.config.configData.tableConfig,
     dataEndPoints: state.config.configData.dataEndPoints,
   };
